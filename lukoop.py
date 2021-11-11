@@ -10,10 +10,11 @@ result_delimiter = '@'
 HELP_MESSAGE = """
         lukoop.py 
         -c --command search/columns/list
-        -p --path path to folder or file        
+        -p --path path to folder or file 
+        -f --filename Include the filename in the attributes       
         """
 
-def get_columns(csvFilePath, target_row):
+def get_columns(csvFilePath, target_row, addPath):
 
     items_array = []
 
@@ -32,6 +33,15 @@ def get_columns(csvFilePath, target_row):
                     item['arg'] = row[key]
                     items_array.append(item)                
                 break            
+    
+    if addPath:
+        item = {}
+        item['uid'] = csvFilePath
+        item['title'] = 'File'
+        item['subtitle'] = csvFilePath
+        item['arg'] = csvFilePath
+        items_array.append(item)
+
     items = {}
     items['items'] = items_array
 
@@ -94,12 +104,14 @@ def sheets(csvFilePath):
 
 folder = ""
 command = "search"
+show_path_in_columns = False
 
 try:
 
     argv = sys.argv[1:]
-    opts, args = getopt.getopt(argv, "c:p:h", ["command=", "path=", "help"])
+    opts, args = getopt.getopt(argv, "fc:p:h", ["filename", "command=", "path=", "help"])
     
+
 except getopt.GetoptError:
     print(HELP_MESSAGE)
     sys.exit(2)
@@ -112,6 +124,8 @@ for opt, arg in opts:
         path = arg
     elif opt in ("-c", "--command"):
         command = arg
+    elif opt in ("-f", "--filename"):
+        show_path_in_columns = True
         
 if command == "search":
     search_json(path)
@@ -119,7 +133,7 @@ if command == "search":
 elif command == "columns":
     just_path = path.split("@")[0]
     target_row = int(path.split("@")[1])
-    get_columns(just_path, target_row)
+    get_columns(just_path, target_row, show_path_in_columns)
 
 elif command == "list":
     sheets(path)
