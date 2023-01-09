@@ -11,7 +11,7 @@ HELP_MESSAGE = """
         lukoop.py 
         -c --command search/columns/list
         -p --path path to folder or file 
-        -f --filename Include the filename in the attributes       
+        -f --filename Include the filename in the attributes and result title       
         """
 
 def get_columns(csvFilePath, target_row, addPath):
@@ -47,7 +47,7 @@ def get_columns(csvFilePath, target_row, addPath):
 
     print(json.dumps(items, indent = 3))
 
-def search_json(csvFilePath): 
+def search_json(csvFilePath, show_filename): 
       
     # create the list of items to search
     items_array = []
@@ -63,13 +63,18 @@ def search_json(csvFilePath):
                     row_index = 0
 
                     # Add each item from the file to an array
-                    for row in csvReader: 
-                                
+                    for row in csvReader:     
+                        
+                        postfix = ''
+                        if show_filename == True:
+                            postfix = ' (' + file + ')'
+
+
                         # Create a script filter item from the array row       
                         item = {}
                         uid = row[list(row.keys())[0]]
                         item['uid'] = uid
-                        item['title'] = row[list(row.keys())[1]]
+                        item['title'] = row[list(row.keys())[1]] + postfix
                         item['subtitle'] = ', '.join(str(x) for x in row.values())
                         item['arg'] = os.path.join(root, file) + result_delimiter + str(row_index) # row index?
                         item['match'] = ' '.join(str(x) for x in row.values())
@@ -128,7 +133,7 @@ for opt, arg in opts:
         show_path_in_columns = True
         
 if command == "search":
-    search_json(path)
+    search_json(path, show_path_in_columns)
 
 elif command == "columns":
     just_path = path.split("@")[0]
